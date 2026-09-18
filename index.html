@@ -1,1 +1,889 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1479E8">
+  <title>SafeDeal - Beta</title>
+  <style>
+    :root{
+      --blue:#1479E8;
+      --navy:#102A56;
+      --green:#16B85A;
+      --red:#DC3545;
+      --bg:#F5F7FA;
+      --text:#1F2937;
+      --muted:#6B7280;
+      --white:#FFFFFF;
+      --border:#E5E7EB;
+      --shadow:0 8px 28px rgba(16,42,86,.08);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#eaf0f7;
+      color:var(--text);
+    }
+
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+
+    .app{
+      width:100%;
+      max-width:430px;
+      min-height:100vh;
+      margin:auto;
+      background:var(--bg);
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    .screen{display:none; min-height:100vh; padding-bottom:88px}
+    .screen.active{display:block}
+
+    .topbar{
+      background:var(--white);
+      padding:18px 20px 14px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      border-bottom:1px solid rgba(229,231,235,.7);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .logo{
+      width:38px;
+      height:38px;
+      border-radius:11px;
+      background:var(--blue);
+      display:grid;
+      place-items:center;
+      position:relative;
+      color:#fff;
+      font-weight:800;
+      font-size:19px;
+      box-shadow:0 5px 15px rgba(20,121,232,.25);
+    }
+
+    .logo:after{
+      content:"✓";
+      position:absolute;
+      right:-7px;
+      bottom:-5px;
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      background:var(--green);
+      border:2px solid white;
+      font-size:12px;
+      display:grid;
+      place-items:center;
+    }
+
+    .brand-name{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:-.7px;
+      color:var(--navy);
+    }
+
+    .brand-name span{color:var(--blue)}
+
+    .content{padding:20px}
+
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:28px;line-height:1.15;color:var(--navy);margin-bottom:8px}
+    h2{font-size:21px;color:var(--navy);margin-bottom:8px}
+    h3{font-size:17px;color:var(--navy)}
+    p{line-height:1.5}
+    .muted{color:var(--muted);font-size:14px}
+
+    .welcome{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:32px 24px;
+      background:linear-gradient(160deg,#fff 0%,#f4f8ff 55%,#eefbf5 100%);
+    }
+
+    .welcome .logo{
+      width:58px;height:58px;font-size:27px;border-radius:16px;margin-bottom:18px
+    }
+    .welcome .logo:after{width:25px;height:25px;font-size:15px}
+    .welcome h1{font-size:36px}
+    .welcome-art{
+      margin:25px 0;
+      height:185px;
+      border-radius:28px;
+      background:linear-gradient(135deg,#dfeeff,#eafaf1);
+      position:relative;
+      overflow:hidden;
+    }
+    .shield{
+      position:absolute;
+      width:92px;height:110px;
+      left:50%;top:50%;
+      transform:translate(-50%,-50%);
+      background:var(--green);
+      clip-path:polygon(50% 0,92% 15%,86% 70%,50% 100%,14% 70%,8% 15%);
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-size:48px;
+      box-shadow:0 12px 30px rgba(22,184,90,.25);
+    }
+    .bubble{
+      position:absolute;
+      background:#fff;
+      border-radius:14px;
+      padding:11px 13px;
+      font-weight:700;
+      font-size:12px;
+      box-shadow:var(--shadow);
+    }
+    .b1{left:14px;top:24px;color:var(--blue)}
+    .b2{right:14px;bottom:28px;color:var(--green)}
+
+    .btn{
+      width:100%;
+      min-height:50px;
+      border:0;
+      border-radius:12px;
+      font-weight:700;
+      padding:12px 16px;
+      transition:.15s;
+    }
+    .btn:active{transform:scale(.98)}
+    .primary{background:var(--blue);color:#fff}
+    .green{background:var(--green);color:#fff}
+    .secondary{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+    .danger{background:#fff;color:var(--red);border:1px solid #f0a6ad}
+    .ghost{background:transparent;color:var(--blue)}
+    .btn + .btn{margin-top:10px}
+
+    .home-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .icon-btn{
+      border:0;background:#fff;width:42px;height:42px;border-radius:12px;
+      box-shadow:0 3px 15px rgba(0,0,0,.06);font-size:20px
+    }
+
+    .security-card{
+      background:linear-gradient(135deg,var(--navy),#17498d);
+      color:#fff;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+    .security-icon{
+      width:42px;height:42px;border-radius:12px;background:rgba(22,184,90,.18);
+      display:grid;place-items:center;font-size:21px;margin-bottom:15px
+    }
+    .security-card h2{color:#fff;margin-bottom:5px}
+    .security-card p{color:#dce9fa;font-size:14px;margin-bottom:0}
+
+    .section-title{
+      display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px
+    }
+    .section-title h2{margin:0}
+    .link{border:0;background:transparent;color:var(--blue);font-weight:700;font-size:13px}
+
+    .purchase-card,.info-card,.form-card,.notification-card{
+      background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+
+    .purchase-row{
+      display:flex;gap:12px;align-items:center
+    }
+    .product-img{
+      width:58px;height:58px;border-radius:13px;background:linear-gradient(135deg,#e6edf7,#fff);
+      display:grid;place-items:center;font-size:27px;flex:none
+    }
+    .purchase-info{flex:1}
+    .purchase-info strong{display:block;color:var(--navy);margin-bottom:4px}
+    .price{font-weight:800;color:var(--navy)}
+    .status{
+      display:inline-flex;align-items:center;gap:5px;
+      border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;
+      background:#eafaf1;color:#0c8d45;
+    }
+    .status.blue{background:#e9f2ff;color:#126bd0}
+    .status.red{background:#fff0f1;color:#b92534}
+    .status.gray{background:#f0f2f5;color:#667085}
+
+    .nav{
+      position:fixed;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:min(430px,100%);
+      height:76px;
+      background:#fff;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      border-top:1px solid var(--border);
+      z-index:50;
+      box-shadow:0 -5px 20px rgba(16,42,86,.05);
+    }
+    .nav button{
+      border:0;background:transparent;color:#8b95a5;font-size:11px;
+      display:flex;flex-direction:column;align-items:center;gap:5px;font-weight:700
+    }
+    .nav button .nav-icon{font-size:21px;line-height:1}
+    .nav button.active{color:var(--blue)}
+
+    .progress{
+      display:flex;justify-content:space-between;align-items:flex-start;
+      margin:24px 0;
+      position:relative;
+    }
+    .progress:before{
+      content:"";position:absolute;top:15px;left:13%;right:13%;height:3px;background:#e4e8ee
+    }
+    .step{
+      position:relative;z-index:2;width:25%;text-align:center;font-size:10px;color:#8b95a5
+    }
+    .dot{
+      width:31px;height:31px;margin:auto auto 6px;border-radius:50%;
+      background:#e6e9ee;display:grid;place-items:center;font-weight:800
+    }
+    .step.done{color:var(--green);font-weight:700}
+    .step.done .dot{background:var(--green);color:#fff}
+    .step.current{color:var(--blue);font-weight:700}
+    .step.current .dot{background:var(--blue);color:#fff}
+
+    .timeline{margin-top:18px}
+    .timeline-item{
+      display:flex;gap:13px;position:relative;padding-bottom:20px
+    }
+    .timeline-item:not(:last-child):before{
+      content:"";position:absolute;left:14px;top:30px;width:2px;height:calc(100% - 20px);background:#dfe4eb
+    }
+    .timeline-dot{
+      width:29px;height:29px;border-radius:50%;background:#e8ebef;flex:none;
+      display:grid;place-items:center;font-size:12px;z-index:1
+    }
+    .timeline-item.done .timeline-dot{background:var(--green);color:#fff}
+    .timeline-item.current .timeline-dot{background:var(--blue);color:#fff}
+    .timeline-text strong{display:block;color:var(--navy);font-size:14px}
+    .timeline-text span{font-size:12px;color:var(--muted)}
+
+    label{
+      display:block;font-size:13px;font-weight:700;color:var(--navy);margin:14px 0 7px
+    }
+    input,textarea,select{
+      width:100%;border:1px solid #dfe3e8;border-radius:11px;padding:13px;
+      background:#fff;outline:none;color:var(--text)
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,121,232,.08)}
+    textarea{min-height:100px;resize:vertical}
+
+    .payment-amount{
+      text-align:center;padding:20px;background:#f7fbff;border-radius:16px;margin:15px 0
+    }
+    .payment-amount small{color:var(--muted)}
+    .payment-amount strong{display:block;font-size:32px;color:var(--navy);margin-top:5px}
+
+    .protected{
+      display:flex;gap:12px;align-items:flex-start;background:#ecfbf3;
+      border:1px solid #c9f1db;padding:14px;border-radius:14px;margin:14px 0
+    }
+    .protected-icon{
+      width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;
+      display:grid;place-items:center;flex:none
+    }
+    .protected strong{color:#08783a;display:block;margin-bottom:3px}
+    .protected span{font-size:12px;color:#27704a}
+
+    .decision{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px
+    }
+
+    .evidence-box{
+      border:1.5px dashed #b9c3d1;background:#fafcff;border-radius:14px;padding:20px;
+      text-align:center;color:var(--muted);margin:14px 0
+    }
+    .evidence-box .camera{font-size:30px;margin-bottom:7px}
+
+    .empty{
+      text-align:center;padding:40px 15px;color:var(--muted)
+    }
+
+    .profile-header{text-align:center;padding:8px 0 20px}
+    .avatar{
+      width:76px;height:76px;border-radius:50%;margin:auto auto 10px;
+      background:linear-gradient(135deg,var(--blue),#75b3ff);color:#fff;
+      display:grid;place-items:center;font-size:26px;font-weight:800
+    }
+    .menu-item{
+      width:100%;border:0;background:#fff;padding:15px;border-radius:12px;margin-bottom:8px;
+      display:flex;justify-content:space-between;align-items:center;color:var(--navy);font-weight:700
+    }
+
+    .toast{
+      position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);
+      width:min(390px,calc(100% - 30px));background:var(--navy);color:#fff;
+      padding:13px 16px;border-radius:12px;box-shadow:var(--shadow);
+      opacity:0;pointer-events:none;transition:.25s;z-index:100;font-size:13px
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    .modal{
+      position:fixed;inset:0;background:rgba(16,42,86,.42);display:none;align-items:flex-end;
+      justify-content:center;z-index:90
+    }
+    .modal.show{display:flex}
+    .modal-box{
+      width:min(430px,100%);background:#fff;border-radius:22px 22px 0 0;padding:22px;
+      max-height:85vh;overflow:auto
+    }
+    .modal-head{display:flex;justify-content:space-between;align-items:center}
+    .close{border:0;background:#f2f4f7;border-radius:50%;width:34px;height:34px}
+
+    .small-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:12px}
+    .success-box{text-align:center;padding:15px 0 5px}
+    .success-circle{
+      width:66px;height:66px;background:#e8f9f0;color:var(--green);border-radius:50%;
+      display:grid;place-items:center;font-size:34px;margin:0 auto 12px
+    }
+
+    @media(min-width:700px){
+      body{padding:25px 0}
+      .app{border-radius:25px;box-shadow:0 20px 60px rgba(16,42,86,.15);min-height:calc(100vh - 50px)}
+      .nav{border-radius:0 0 25px 25px}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- BIENVENIDA -->
+  <section id="welcome" class="screen active">
+    <div class="welcome">
+      <div class="logo">S</div>
+      <h1>Compra con confianza.</h1>
+      <p>SafeDeal protege tu dinero hasta que recibas y confirmes tu producto.</p>
+
+      <div class="welcome-art">
+        <div class="bubble b1">Pago protegido</div>
+        <div class="shield">✓</div>
+        <div class="bubble b2">Producto recibido</div>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('home'); setNav('home')">Comenzar</button>
+      <p class="small-note">Prototipo beta académico de SafeDeal. Los pagos y estados mostrados son simulados.</p>
+    </div>
+  </section>
+
+  <!-- INICIO -->
+  <section id="home" class="screen">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div class="brand-name">Safe<span>Deal</span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="home-head">
+        <div>
+          <p class="muted" style="margin-bottom:3px">Hola, Andrea 👋</p>
+          <h1 style="font-size:25px;margin:0">Tus compras</h1>
+        </div>
+        <button class="icon-btn" onclick="showToast('No tienes nuevas notificaciones')">🔔</button>
+      </div>
+
+      <div class="security-card">
+        <div class="security-icon">🛡️</div>
+        <h2>Tu dinero está protegido</h2>
+        <p>SafeDeal mantiene protegido el pago hasta que confirmes que recibiste tu producto.</p>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('registerPurchase'); setNav('home')">＋ Registrar una compra</button>
+
+      <div class="section-title">
+        <h2>Compra reciente</h2>
+        <button class="link" onclick="showScreen('purchases'); setNav('purchases')">Ver todas</button>
+      </div>
+
+      <div class="purchase-card">
+        <div class="purchase-row">
+          <div class="product-img">👟</div>
+          <div class="purchase-info">
+            <strong>Zapatillas deportivas</strong>
+            <span class="muted">Carlos M. · Facebook Marketplace</span>
+            <div style="margin-top:7px"><span class="status blue">● Dinero protegido</span></div>
+          </div>
+          <div class="price">S/ 120</div>
+        </div>
+        <button class="btn secondary" style="margin-top:14px" onclick="showScreen('tracking'); setNav('purchases')">Ver seguimiento</button>
+      </div>
+
+      <div class="section-title"><h2>¿Cómo funciona?</h2></div>
+      <div class="info-card">
+        <p style="margin-bottom:9px"><b>1.</b> Registras tu compra.</p>
+        <p style="margin-bottom:9px"><b>2.</b> Realizas el pago protegido.</p>
+        <p style="margin-bottom:9px"><b>3.</b> Recibes y revisas tu producto.</p>
+        <p style="margin:0"><b>4.</b> Confirmas para liberar el pago.</p>
+      </div>
+    </div>
+    <nav class="nav" id="navHome"></nav>
+  </section>
+
+  <!-- REGISTRAR COMPRA -->
+  <section id="registerPurchase" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <button class="link" onclick="showScreen('home');setNav('home')" style="padding:0;margin-bottom:18px">← Volver</button>
+      <h1>Registrar compra</h1>
+      <p class="muted">Ingresa los datos básicos de la operación.</p>
+
+      <div class="form-card">
+        <label>Producto</label>
+        <input id="productName" value="Zapatillas deportivas" placeholder="Ej. Audífonos">
+
+        <label>Precio</label>
+        <input id="productPrice" value="120" type="number" min="1" placeholder="Ej. 120">
+
+        <label>Vendedor</label>
+        <input id="sellerName" value="Carlos M." placeholder="Nombre o usuario">
+
+        <label>Red social</label>
+        <select id="social">
+          <option>Facebook Marketplace</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>WhatsApp</option>
+        </select>
+
+        <label>Descripción acordada</label>
+        <textarea id="description">Zapatillas deportivas blancas, talla 40, nuevas.</textarea>
+      </div>
+
+      <button class="btn primary" onclick="createPurchase()">Continuar al pago protegido</button>
+    </div>
+  </section>
+
+  <!-- PAGO PROTEGIDO -->
+  <section id="payment" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <button class="link" onclick="showScreen('registerPurchase');setNav('home')" style="padding:0;margin-bottom:18px">← Volver</button>
+      <h1>Pago protegido</h1>
+      <p class="muted">Revisa la operación antes de realizar el pago simulado.</p>
+
+      <div class="purchase-card">
+        <div class="purchase-row">
+          <div class="product-img">👟</div>
+          <div class="purchase-info">
+            <strong id="paymentProduct">Zapatillas deportivas</strong>
+            <span class="muted" id="paymentSeller">Carlos M. · Facebook Marketplace</span>
+          </div>
+        </div>
+
+        <div class="payment-amount">
+          <small>Total de la compra</small>
+          <strong id="paymentPrice">S/ 120.00</strong>
+        </div>
+
+        <div class="protected">
+          <div class="protected-icon">✓</div>
+          <div>
+            <strong>Tu dinero quedará protegido</strong>
+            <span>El pago se liberará al vendedor después de que confirmes la recepción.</span>
+          </div>
+        </div>
+
+        <label>Método de pago</label>
+        <select>
+          <option>Yape (simulado)</option>
+          <option>Tarjeta (simulado)</option>
+          <option>Plin (simulado)</option>
+        </select>
+      </div>
+
+      <button class="btn green" onclick="completePayment()">Realizar pago simulado</button>
+      <p class="small-note">Este prototipo no realiza movimientos de dinero reales.</p>
+    </div>
+  </section>
+
+  <!-- SEGUIMIENTO -->
+  <section id="tracking" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <button class="link" onclick="showScreen('purchases');setNav('purchases')" style="padding:0;margin-bottom:18px">← Mis compras</button>
+      <h1>Seguimiento</h1>
+
+      <div class="purchase-card">
+        <div class="purchase-row">
+          <div class="product-img">👟</div>
+          <div class="purchase-info">
+            <strong id="trackingProduct">Zapatillas deportivas</strong>
+            <span class="muted" id="trackingSeller">Carlos M.</span>
+          </div>
+          <div class="price" id="trackingPrice">S/ 120</div>
+        </div>
+      </div>
+
+      <div class="security-card" style="margin-top:15px">
+        <div class="security-icon">🛡️</div>
+        <h2>Dinero protegido</h2>
+        <p>Tu dinero sigue protegido mientras esperas la entrega.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item done">
+          <div class="timeline-dot">✓</div>
+          <div class="timeline-text"><strong>Pago realizado</strong><span>Hoy · 10:24</span></div>
+        </div>
+        <div class="timeline-item done">
+          <div class="timeline-dot">✓</div>
+          <div class="timeline-text"><strong>Dinero protegido</strong><span>Hoy · 10:25</span></div>
+        </div>
+        <div class="timeline-item done">
+          <div class="timeline-dot">✓</div>
+          <div class="timeline-text"><strong>Vendedor preparando pedido</strong><span>Hoy · 13:30</span></div>
+        </div>
+        <div class="timeline-item current">
+          <div class="timeline-dot">→</div>
+          <div class="timeline-text"><strong>Pedido enviado</strong><span>En camino</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">5</div>
+          <div class="timeline-text"><strong>Pedido recibido</strong><span>Pendiente</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">6</div>
+          <div class="timeline-text"><strong>Pago liberado</strong><span>Pendiente de confirmación</span></div>
+        </div>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('receive');setNav('purchases')">Simular recepción</button>
+    </div>
+  </section>
+
+  <!-- RECEPCIÓN / DECISIÓN -->
+  <section id="receive" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <h1>¿Recibiste tu pedido?</h1>
+      <p class="muted">Revisa el producto antes de confirmar.</p>
+
+      <div class="purchase-card" style="text-align:center">
+        <div style="font-size:70px;margin:8px 0">📦</div>
+        <h2>Tu pedido llegó</h2>
+        <p class="muted">Comprueba que el producto coincide con lo acordado con el vendedor.</p>
+      </div>
+
+      <div class="protected">
+        <div class="protected-icon">🛡️</div>
+        <div>
+          <strong>El dinero sigue protegido</strong>
+          <span>No se liberará al vendedor hasta que tomes una decisión.</span>
+        </div>
+      </div>
+
+      <button class="btn green" onclick="confirmReceipt()">✓ Sí, lo recibí correctamente</button>
+      <button class="btn danger" onclick="showScreen('claim');setNav('purchases')">Tengo un problema</button>
+    </div>
+  </section>
+
+  <!-- ÉXITO -->
+  <section id="success" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content success-box">
+      <div class="success-circle">✓</div>
+      <h1>¡Pedido confirmado!</h1>
+      <p>Confirmaste que recibiste correctamente tu producto.</p>
+
+      <div class="security-card" style="text-align:left;margin-top:22px">
+        <div class="security-icon">💸</div>
+        <h2>Pago liberado al vendedor</h2>
+        <p>La operación se completó después de tu confirmación.</p>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('purchases');setNav('purchases')">Ver mis compras</button>
+      <button class="btn secondary" onclick="showScreen('home');setNav('home')">Ir al inicio</button>
+    </div>
+  </section>
+
+  <!-- RECLAMO -->
+  <section id="claim" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <button class="link" onclick="showScreen('receive');setNav('purchases')" style="padding:0;margin-bottom:18px">← Volver</button>
+      <h1>Reportar un problema</h1>
+      <p class="muted">Cuéntanos qué ocurrió con tu compra.</p>
+
+      <div class="form-card">
+        <label>¿Qué ocurrió?</label>
+        <select id="claimType">
+          <option>El producto no coincide con lo acordado</option>
+          <option>El producto llegó dañado</option>
+          <option>Recibí un producto diferente</option>
+          <option>No recibí el producto</option>
+          <option>Otro inconveniente</option>
+        </select>
+
+        <label>Describe el problema</label>
+        <textarea id="claimDescription" placeholder="Explica brevemente lo ocurrido..."></textarea>
+
+        <label>Evidencia</label>
+        <div class="evidence-box" onclick="showToast('En la beta se abriría la cámara o galería')">
+          <div class="camera">📷</div>
+          <b>Agregar foto o video</b>
+          <div style="font-size:12px;margin-top:5px">La evidencia ayuda a revisar el caso.</div>
+        </div>
+      </div>
+
+      <button class="btn primary" onclick="submitClaim()">Enviar reporte</button>
+      <p class="small-note">Tu dinero permanece protegido mientras el caso está en revisión.</p>
+    </div>
+  </section>
+
+  <!-- REPORTE ENVIADO -->
+  <section id="claimSent" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content success-box">
+      <div class="success-circle">✓</div>
+      <h1>Reporte registrado</h1>
+      <p>Tu incidencia fue registrada y queda en revisión.</p>
+
+      <div class="info-card" style="text-align:left">
+        <p><b>Estado</b><br><span class="status blue">● En revisión</span></p>
+        <p><b>Dinero</b><br><span class="status">● Protegido</span></p>
+        <p style="margin:0"><b>Próximo paso</b><br><span class="muted">Revisar la evidencia y actualizar el caso.</span></p>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('reports');setNav('reports')">Ver reportes</button>
+    </div>
+  </section>
+
+  <!-- MIS COMPRAS -->
+  <section id="purchases" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <h1>Mis compras</h1>
+      <p class="muted">Consulta tus operaciones y el estado de cada compra.</p>
+
+      <div class="purchase-card">
+        <div class="purchase-row">
+          <div class="product-img">👟</div>
+          <div class="purchase-info">
+            <strong>Zapatillas deportivas</strong>
+            <span class="muted">Carlos M. · Facebook Marketplace</span>
+            <div style="margin-top:7px"><span class="status blue">● Pedido enviado</span></div>
+          </div>
+          <div class="price">S/ 120</div>
+        </div>
+        <button class="btn secondary" style="margin-top:14px" onclick="showScreen('tracking')">Ver detalle</button>
+      </div>
+
+      <div class="purchase-card">
+        <div class="purchase-row">
+          <div class="product-img">🎧</div>
+          <div class="purchase-info">
+            <strong>Audífonos inalámbricos</strong>
+            <span class="muted">Tienda Digital · Instagram</span>
+            <div style="margin-top:7px"><span class="status">● Pago liberado</span></div>
+          </div>
+          <div class="price">S/ 85</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav" id="navPurchases"></nav>
+  </section>
+
+  <!-- REPORTES -->
+  <section id="reports" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <h1>Mis reportes</h1>
+      <p class="muted">Aquí puedes revisar tus incidencias.</p>
+
+      <div class="notification-card">
+        <div style="display:flex;justify-content:space-between;gap:10px">
+          <div>
+            <strong style="color:var(--navy)">Reporte #SD-001</strong>
+            <p class="muted" style="margin:5px 0">Zapatillas deportivas</p>
+          </div>
+          <span class="status blue">En revisión</span>
+        </div>
+        <div class="timeline" style="margin-top:18px">
+          <div class="timeline-item done">
+            <div class="timeline-dot">✓</div>
+            <div class="timeline-text"><strong>Reporte registrado</strong><span>Hoy</span></div>
+          </div>
+          <div class="timeline-item current">
+            <div class="timeline-dot">→</div>
+            <div class="timeline-text"><strong>Evidencia en revisión</strong><span>Proceso activo</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot">3</div>
+            <div class="timeline-text"><strong>Resolución</strong><span>Pendiente</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav" id="navReports"></nav>
+  </section>
+
+  <!-- PERFIL -->
+  <section id="profile" class="screen">
+    <header class="topbar">
+      <div class="brand"><div class="logo">S</div><div class="brand-name">Safe<span>Deal</span></div></div>
+    </header>
+    <div class="content">
+      <div class="profile-header">
+        <div class="avatar">AF</div>
+        <h2 style="margin-bottom:2px">Andrea Fernández</h2>
+        <span class="muted">Cuenta beta</span>
+      </div>
+
+      <button class="menu-item" onclick="showToast('Función de edición disponible próximamente')">👤 Datos personales <span>›</span></button>
+      <button class="menu-item" onclick="showToast('Notificaciones activadas')">🔔 Notificaciones <span>›</span></button>
+      <button class="menu-item" onclick="showToast('Centro de ayuda en construcción')">❓ Centro de ayuda <span>›</span></button>
+      <button class="menu-item" onclick="showToast('Política de protección en construcción')">🛡️ Protección SafeDeal <span>›</span></button>
+
+      <div class="info-card" style="margin-top:20px">
+        <strong style="color:var(--navy)">SafeDeal Beta</strong>
+        <p class="muted" style="margin:5px 0 0">Prototipo académico para validar una experiencia de compra segura en redes sociales.</p>
+      </div>
+    </div>
+    <nav class="nav" id="navProfile"></nav>
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  let purchase = {
+    product: "Zapatillas deportivas",
+    price: 120,
+    seller: "Carlos M.",
+    social: "Facebook Marketplace",
+    description: "Zapatillas deportivas blancas, talla 40, nuevas."
+  };
+
+  const screens = ["home","registerPurchase","payment","tracking","receive","success","claim","claimSent","purchases","reports","profile","welcome"];
+
+  function showScreen(id){
+    screens.forEach(s => {
+      const el=document.getElementById(s);
+      if(el) el.classList.toggle("active",s===id);
+    });
+    window.scrollTo({top:0,behavior:"smooth"});
+    updateNavVisibility(id);
+  }
+
+  function setNav(active){
+    document.querySelectorAll(".nav button").forEach(btn=>{
+      btn.classList.toggle("active",btn.dataset.nav===active);
+    });
+  }
+
+  function updateNavVisibility(screen){
+    document.querySelectorAll(".nav").forEach(n=>n.style.display="none");
+    if(["home"].includes(screen)) document.getElementById("navHome").style.display="flex";
+    if(["purchases","tracking","receive","success"].includes(screen)) document.getElementById("navPurchases").style.display="flex";
+    if(["reports","claim","claimSent"].includes(screen)) document.getElementById("navReports").style.display="flex";
+    if(["profile"].includes(screen)) document.getElementById("navProfile").style.display="flex";
+  }
+
+  function buildNav(id){
+    const el=document.getElementById(id);
+    el.innerHTML=`
+      <button data-nav="home" onclick="showScreen('home');setNav('home')"><span class="nav-icon">⌂</span>Inicio</button>
+      <button data-nav="purchases" onclick="showScreen('purchases');setNav('purchases')"><span class="nav-icon">🛍</span>Mis compras</button>
+      <button data-nav="reports" onclick="showScreen('reports');setNav('reports')"><span class="nav-icon">⚠</span>Reportes</button>
+      <button data-nav="profile" onclick="showScreen('profile');setNav('profile')"><span class="nav-icon">●</span>Perfil</button>
+    `;
+  }
+  ["navHome","navPurchases","navReports","navProfile"].forEach(buildNav);
+
+  function createPurchase(){
+    purchase.product=document.getElementById("productName").value.trim() || "Producto";
+    purchase.price=parseFloat(document.getElementById("productPrice").value) || 0;
+    purchase.seller=document.getElementById("sellerName").value.trim() || "Vendedor";
+    purchase.social=document.getElementById("social").value;
+    purchase.description=document.getElementById("description").value.trim();
+
+    if(purchase.price<=0){
+      showToast("Ingresa un precio válido");
+      return;
+    }
+
+    document.getElementById("paymentProduct").textContent=purchase.product;
+    document.getElementById("paymentSeller").textContent=`${purchase.seller} · ${purchase.social}`;
+    document.getElementById("paymentPrice").textContent=`S/ ${purchase.price.toFixed(2)}`;
+
+    showScreen("payment");
+  }
+
+  function completePayment(){
+    document.getElementById("trackingProduct").textContent=purchase.product;
+    document.getElementById("trackingSeller").textContent=purchase.seller;
+    document.getElementById("trackingPrice").textContent=`S/ ${purchase.price.toFixed(0)}`;
+    showToast("Pago simulado realizado. Tu dinero está protegido.");
+    setTimeout(()=>showScreen("tracking"),650);
+  }
+
+  function confirmReceipt(){
+    showScreen("success");
+    showToast("Confirmación registrada");
+  }
+
+  function submitClaim(){
+    showScreen("claimSent");
+    showToast("Reporte registrado correctamente");
+  }
+
+  function showToast(message){
+    const toast=document.getElementById("toast");
+    toast.textContent=message;
+    toast.classList.add("show");
+    clearTimeout(window.toastTimer);
+    window.toastTimer=setTimeout(()=>toast.classList.remove("show"),2600);
+  }
+
+  showScreen("welcome");
+</script>
+</body>
+</html>
